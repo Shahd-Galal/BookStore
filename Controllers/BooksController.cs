@@ -29,9 +29,20 @@ namespace BookStoreApi.Controllers
 
             }
 
-                         //paging
+
+            //paging
             var totalCount =  query.Count();
             var books =  query.Skip((pageNumber - 1) * PageSize).Take(PageSize);
+
+            //Handel
+            if (totalCount == 0)
+            {
+                return NotFound(new
+                {
+                    Message = "No books found",
+                    Search = search
+                });
+            }
 
 
             return Ok(new
@@ -41,12 +52,6 @@ namespace BookStoreApi.Controllers
                 pageSize = PageSize,
                 Data = books
             });
-
-            {
-                _logger.LogInformation("Getting All books");
-                // throw new Exception("Test Error");
-                return Ok(await _context.Books.Include(b => b.Category).ToListAsync());
-            }
         }
 
 
