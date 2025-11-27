@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BookStoreApi.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,9 @@ namespace BookStoreApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(string? search, int pageNumber = 1, int PageSize = 10)
         {
-            var query = _context.Books.Include(b => b.Category).ToList();
+            
+
+            var query = _context.Books.ToList();
 
 
                          //search
@@ -60,31 +63,13 @@ namespace BookStoreApi.Controllers
             public async Task<IActionResult> Get(int id)
             {
                 _logger.LogInformation("Getting All books");
-                var book = await _context.Books.Include(b => b.Category).FirstOrDefaultAsync(b => b.Id == id);
+                var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
                 if (book == null)
                     return NotFound();
                 return Ok(book);
             }
 
-            //Search Endpoint
-
-            //[HttpGet("search")]
-            //public async Task<IActionResult> search([FromBody] string title)
-            //{
-            //    var books = await _context.Books.Where(b =>  b.Title.Contains(title)).ToListAsync();
-            //    return Ok(books);
-            //}
-
-            //Pagination
-
-            //[HttpGet ("paged")]
-            //public async Task<IActionResult>GetPaged(int page = 1, int pageSize = 10)
-            //{
-            //    var books = await _context.Books.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-            //    return Ok(books);
-            //}
-
-
+          
             [HttpPost]
             public async Task<IActionResult> Create([FromBody] CreateBookDto dto)
             {
