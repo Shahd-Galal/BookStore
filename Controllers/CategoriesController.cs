@@ -1,4 +1,5 @@
-﻿
+﻿using BookStoreApi.Models;
+using BookStoreApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,17 +10,17 @@ namespace BookStoreApi.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICategoryService _Services;
 
-        public CategoriesController(ApplicationDbContext context)
+        public CategoriesController(ICategoryService services)
         {
-            _context = context;
+            _Services = services;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync() 
+        public async Task<IActionResult> GetAll() 
         {
-            var Categories = await _context.Categories.Include(c => c.Books).ToListAsync();
+            var Categories = await _Services.GetAll();
 
             return Ok(Categories);
         }
@@ -28,7 +29,7 @@ namespace BookStoreApi.Controllers
 
         public async Task<IActionResult>GetCategory(int id)
         {
-            var Category = await _context.Categories.Include(c => c.Books).FirstOrDefaultAsync(c => c.Id == id);
+            var Category = await _Services.GetById(id);
             if (Category == null)
                 return NotFound();
             return Ok(Category);
@@ -37,36 +38,50 @@ namespace BookStoreApi.Controllers
 
         [HttpPost]
 
-        public async Task<IActionResult> CreateAsync(CreateCategoryDto dto)
+        public async Task<IActionResult> CreateAsync(Category dto)
         {
             var Category = new Category { Name = dto.Name };
-          await  _context.Categories.AddAsync(Category);
-            _context.SaveChanges();
+          await _Services.Create(dto);
+           
             return Ok(Category);
         }
 
         [HttpPut ("{id}")]
-        public async Task<IActionResult> Update(int id , CreateCategoryDto dto)
+        public async Task<IActionResult> Update(int id , Category dto)
         {
-            var Category = await _context.Categories.FindAsync(id); 
-            if(Category == null)
-                return NotFound();
-            Category.Name = dto.Name;
-            await _context.SaveChangesAsync();
-            return Ok(Category);
+            var Category = await _Services.Create(dto); 
+            if(Category)
+                return Ok(Category);
+           
+
+            return BadRequest("");
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult>Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var Category = await _context.Categories.Include(c => c.Books).FirstOrDefaultAsync(c => c.Id == id);
-            if (Category == null)
-                return NotFound();
-            if (Category.Books.Count > 0)
-                return BadRequest("Category has book Can't be deleted");
-            _context.Categories.Remove(Category);
-            await _context.SaveChangesAsync();
-            return Ok("Deleted");
+           
+            try
+            {
+                var category = await _Services.GetById(id);
+
+                if(category == null)
+                    return NotFound();
+
+                var Category = await _Services.Delete(id);
+                if (Category == -1)
+                    return BadRequest("Category has book Can't be deleted");
+                return Ok("Deleted");
+
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest("Delete failed");
+
+            }
         }
+
+      
     }
 }

@@ -1,4 +1,7 @@
+using BookStoreApi.Controllers;
 using BookStoreApi.Models;
+using BookStoreApi.Repositories;
+using BookStoreApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +13,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddLogging();
 
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookService, BookServices>();
+
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryServices>();
 builder.Services.AddControllers();
+
+
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -53,3 +63,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+{
+}

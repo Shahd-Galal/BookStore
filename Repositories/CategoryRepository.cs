@@ -13,11 +13,22 @@ namespace BookStoreApi.Repositories
         {
             _context = context;
         }
-        public async Task<List<Category>>GetAll() => await _context.Categories.ToListAsync();
+        public async Task<List<Category>> GetAll()
+        {
+            return await _context.Categories.Include(c => c.Books).ToListAsync();
+                
+        }
 
-        public async Task<Category?> GetById(int id) => await _context.Categories.FindAsync(id);
+        public async Task<Category?> GetById(int id)
+        {
+            return await _context.Categories.Include(c => c.Books).FirstOrDefaultAsync(c => c.Id == id);
+        }
 
-        public async Task Add(Category category) => await _context.Categories.AddAsync(category);
+        public async Task Add(Category category)
+        {
+            await _context.AddAsync(category);
+            await _context.SaveChangesAsync();
+        }
 
         public Task Update(Category category)
         {
@@ -25,9 +36,9 @@ namespace BookStoreApi.Repositories
             return Task.CompletedTask;
         }
 
-        public Task Delete(Category category)
+        public async Task<Task> Delete(Category category, int id)
         {
-            _context.Categories.Remove(category);
+          await  _context.Categories.Include(c => c.Books).FirstOrDefaultAsync(c => c.Id == id);
             return Task.CompletedTask;
         }
         
@@ -44,5 +55,16 @@ namespace BookStoreApi.Repositories
             return await query.ToListAsync();
         }
         public async Task Save() => await _context.SaveChangesAsync();
+
+        Task ICategoryRepository.Delete(Category category)
+        {
+            return Delete(category, category);
+
+        }
+
+        private async Task Delete(Category category1, Category category2)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

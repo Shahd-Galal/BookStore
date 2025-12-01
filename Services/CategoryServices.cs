@@ -13,72 +13,98 @@ namespace BookStoreApi.Services
             _repo = repo;
         }
 
-        public async Task<List<CreateCategoryDto>> GetAll()
+        public async Task<List<Category>> GetAll()
         {
             var data = await _repo.GetAll();
-            return data.Select(static c => new CreateCategoryDto
+
+            return data.Select(static c => new Category
             {
-                id = c.Id,
+                Id = c.Id,
                 Name = c.Name
             }).ToList();
         }
 
-        public async Task<CreateCategoryDto?> GetById(int id)
+        public async Task<Category?> GetById(int id)
         {
             var category = await _repo.GetById(id);
             if (category == null)
                 return null;
 
-            return new CreateCategoryDto
+            return new Category
             {
-                id = category.Id,
+                Id = category.Id,
                 Name = category.Name
             };
         }
 
-        public async Task<bool> Create(CreateCategoryDto dto)
+        public async Task<bool> Create(Category dto)
         {
-            var category = new Category
-            {
-                Name = dto.Name
-            };
 
-            await _repo.Add(category);
-            await _repo.Save();
-            return true;
+
+            if (dto.Name == null)
+            {
+                return false;
+            }
+            try
+            {
+                await _repo.Add(dto);
+                return true;
+            }
+            catch (Exception ex) 
+            {
+                return false;
+            }
+
+
+         
         }
 
-        public async Task<bool> Update(int id, CreateCategoryDto dto)
+        public async Task<bool> Update(int id, Category dto)
         {
-            var category = await _repo.GetById(id);
-            if (category == null)
-                return false;
-            category.Name = dto.Name; 
-            _repo.Update(category);
-            await _repo.Save();
-            return true;
+
+            try
+            {
+                var category = await _repo.GetById(id);
+                if (category == null)
+                    return false;
+                category.Name = dto.Name;
+                _repo.Update(category);
+                await _repo.Save();
+                return true;
+            }
+            catch (Exception ex)
+            { 
+                return true;
+            }
         }
 
         public async Task<int> Delete(int id)
         {
-            var category = await _repo.GetById(id);
-            if (category == null)
-                return 0;
-            if (await _repo.HasBooks(id))
-                return -1;
-            _repo.Delete(category);
-            await _repo.Save();
-            return 1;
+            try
+            {
+                var category = await _repo.GetById(id);
+                if (category == null)
+                    return 0;
+                if (await _repo.HasBooks(id))
+                    return -1;
+                await _repo.Save();
+                return 1;
+            }
+            catch (Exception ex) 
+            {
+                return -2;
+            }
+
         }
 
 
-        public async Task<List<CreateCategoryDto>> SearchAndPaged(string? search, int pageNumber, int pageSize)
+        public async Task<List<Category>> SearchAndPaged(string? search, int pageNumber, int pageSize)
         {
             var data = await _repo.SearchAndPaged(search, pageNumber, pageSize);
 
-            return data.Select(c => new CreateCategoryDto
+            return data.Select(c => new Category
             {
-                id = c.Id,
+                Id = c.Id,
                 Name = c.Name
             }).ToList();
         }

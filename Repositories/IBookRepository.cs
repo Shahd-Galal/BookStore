@@ -3,7 +3,7 @@
     public interface IBookRepository
     {
 
-        Task<List<Book>> GetAll();
+        Task<List<Book>> GetAll(string? search, int pageNumber = 0, int PageSize = 10);
         Task<Book?> GetById(int id);
         Task Add(Book book);
         Task Update(Book book);

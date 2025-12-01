@@ -1,4 +1,5 @@
-﻿using BookStoreApi.Services;
+﻿using BookStoreApi.Models;
+using BookStoreApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,34 +10,19 @@ namespace BookStoreApi.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<BooksController> _logger;
-        public BooksController(ApplicationDbContext context, ILogger<BooksController> logger)
+        private readonly IBookService _Services;
+        public BooksController(IBookService Services)
         {
-            _context = context;
-            _logger = logger;
+           _Services = Services;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll(string? search, int pageNumber = 1, int PageSize = 10)
         {
-            
 
-            var query = _context.Books.ToList();
-
-
-                         //search
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-              query = query.Where(b => b.Title.Contains(search) || b.Author.Contains(search)).ToList();
-
-            }
-
-
-            //paging
-            var totalCount =  query.Count();
-            var books =  query.Skip((pageNumber - 1) * PageSize).Take(PageSize);
-
+           
+            var query = _Services.GetAll(search, pageNumber, PageSize);
+            int totalCount = query.Result.Count;
             //Handel
             if (totalCount == 0)
             {
@@ -53,7 +39,7 @@ namespace BookStoreApi.Controllers
                 totalCount = totalCount,
                 pageNumber = pageNumber,
                 pageSize = PageSize,
-                Data = books
+                Data = query.Result
             });
         }
 
@@ -62,65 +48,48 @@ namespace BookStoreApi.Controllers
             [HttpGet("{id}")]
             public async Task<IActionResult> Get(int id)
             {
-                _logger.LogInformation("Getting All books");
-                var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+                var book = await _Services.GetById(id);
                 if (book == null)
                     return NotFound();
                 return Ok(book);
             }
 
-          
-            [HttpPost]
-            public async Task<IActionResult> Create([FromBody] CreateBookDto dto)
-            {
-                _logger.LogInformation("Getting All books");
-                var Category = await _context.Categories.FindAsync(dto.CategoryId);
-                if (Category == null)
-                    return BadRequest("Invalid CategoryId");
 
-                var book = new Book
-                {
-                    Title = dto.Title,
-                    Author = dto.Author,
-                    Year = dto.Year,
-                    CategoryId = dto.CategoryId
-                };
-                _context.Books.Add(book);
-                await _context.SaveChangesAsync();
-                return Ok(book);
-            }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Book dto)
+        {
+         
+            var book = await _Services.Create(dto);
 
-            [HttpPut("{id}")]
-            public async Task<IActionResult> Update(int id, CreateBookDto dto)
-            {
-                _logger.LogInformation("Getting All books");
-                var book = await _context.Books.FindAsync(id);
-                if (book == null)
-                    return NotFound();
-                //Return 400
-                var Category = await _context.Categories.FindAsync(dto.CategoryId);
-                if (Category == null)
-                    return BadRequest("Invalid CategoryId");
+        
+            return Ok(book);
+        }
 
-                book.Title = dto.Title;
-                book.Author = dto.Author;
-                book.Year = dto.Year;
-                book.CategoryId = dto.CategoryId;
-                await _context.SaveChangesAsync();
-                return Ok(book);
-            }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, Book dto)
+        {
+            var book = await _Services.Update(id, dto);
+            if (book == null)
+                return NotFound();
+            //Return 400
+            var Category = await _Services.GetCategoryById(id,dto);
+            if (Category == null)
+                return BadRequest("Invalid CategoryId");
+            return Ok(book);
+        }
+
+        
 
             [HttpDelete("{id}")]
             public async Task<IActionResult> Delete(int id)
             {
-                _logger.LogInformation("Getting All books");
-                var book = await _context.Books.FindAsync(id);
+                var book = await _Services.Delete(id);
                 if (book == null)
                     return NotFound();
-                _context.Books.Remove(book);
-                await _context.SaveChangesAsync();
                 return Ok(book);
             }
         
     }
+
+
 }

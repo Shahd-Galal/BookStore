@@ -7,6 +7,6 @@
         public int Year { get; set; }
         public int CategoryId { get; set; }
         public int Id { get; internal set; }
-      //  public string CategoryName { get; internal set; }
+     
     }
 }

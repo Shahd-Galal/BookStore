@@ -1,5 +1,6 @@
 ﻿using BookStoreApi.Controllers;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BookStoreApi.Repositories
 {
@@ -12,11 +13,28 @@ namespace BookStoreApi.Repositories
         public BookRepository(ApplicationDbContext context)
         {
             _context = context;
+
         }
 
-        public async Task<List<Book>> GetAll() => await _context.Books.ToListAsync();
+        public async Task<List<Book>> GetAll(string? search, int pageNumber = 0, int PageSize = 10)
+        {
+           var query =  _context.Books.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query =  query.Where(b => b.Title.Contains(search) || b.Author.Contains(search));
 
-        public async Task<Book?> GetById(int id) => await _context.Books.FindAsync(id);
+            }
+
+
+            //paging
+            var totalCount = query.Count();
+            var page = query.Skip((pageNumber - 1) * PageSize).Take(PageSize).ToList();
+
+            //Handel
+            return await query.ToListAsync();
+        }
+
+        public async Task<Book?> GetById(int id) => await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
 
         public async Task Add(Book book) => await _context.Books.AddAsync(book);
 
@@ -44,7 +62,12 @@ namespace BookStoreApi.Repositories
             query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
             return await query.ToListAsync();
+            await _context.SaveChangesAsync();
         }
-        public async Task Save() => await _context.SaveChangesAsync();
+
+        public Task Save()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
