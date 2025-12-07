@@ -1,4 +1,6 @@
-﻿namespace BookStoreApi.Models
+﻿using System.Text.Json.Serialization;
+
+namespace BookStoreApi.Models
 {
     public class Book
     {
@@ -10,7 +12,8 @@
             // FK
             public int CategoryId { get; set; }
 
-            // Navigation
-            public Category Category { get; set; }
+        // Navigation
+        [JsonIgnore]
+            public virtual Category? Category { get; set; }
     }
 }

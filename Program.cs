@@ -30,7 +30,17 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(
+    
+    opt=> opt.SwaggerDoc("v1",new Microsoft.OpenApi.Models.OpenApiInfo(){
+         Version = "v2",
+        Title = "My SB API",
+        Description = "API to manage book and category"
+       })    
+    );
+
+
+
 
 var app = builder.Build();
 

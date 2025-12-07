@@ -11,6 +11,6 @@ namespace BookStoreApi.Models
 
         //Navigation property
         [JsonIgnore]
-        public List<Book> Books { get; set; }
+        public List<Book>? Books { get; set; }
     }
 }

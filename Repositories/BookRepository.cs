@@ -36,12 +36,22 @@ namespace BookStoreApi.Repositories
 
         public async Task<Book?> GetById(int id) => await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
 
-        public async Task Add(Book book) => await _context.Books.AddAsync(book);
+        public async Task Add(BookDto book){
+            var bookModel = new Book
+            {
+                Title = book.Title,
+                Author = book.Author,
+                CategoryId = book.CategoryId,
+                Year = book.Year
+            };
+            await _context.Books.AddAsync(bookModel);
+            await _context.SaveChangesAsync();
+        }
 
-        public Task Update(Book book)
+        public async Task Update(Book book)
         {
             _context.Books.Update(book);
-            return Task.CompletedTask;
+            await _context.SaveChangesAsync();
         }
 
         public Task Delete(Book book)
@@ -60,14 +70,16 @@ namespace BookStoreApi.Repositories
             }
 
             query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-
+            
+           // await _context.SaveChangesAsync();
             return await query.ToListAsync();
-            await _context.SaveChangesAsync();
+            
+           
         }
 
-        public Task Save()
-        {
-            throw new NotImplementedException();
-        }
+        //public Task Save()
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

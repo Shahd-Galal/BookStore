@@ -87,6 +87,7 @@ namespace BookStoreApi.Services
                     return 0;
                 if (await _repo.HasBooks(id))
                     return -1;
+                await _repo.Delete(category);
                 await _repo.Save();
                 return 1;
             }

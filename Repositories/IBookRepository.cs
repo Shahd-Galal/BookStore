@@ -5,10 +5,10 @@
 
         Task<List<Book>> GetAll(string? search, int pageNumber = 0, int PageSize = 10);
         Task<Book?> GetById(int id);
-        Task Add(Book book);
+        Task Add(BookDto book);
         Task Update(Book book);
         Task Delete(Book book);
         Task<List<Book>> SearchAndPaged(string? search, int pageNumber, int pageSize);
-        Task Save();
+        //Task Save();
     }
 }

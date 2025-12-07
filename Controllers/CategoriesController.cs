@@ -20,19 +20,37 @@ namespace BookStoreApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll() 
         {
-            var Categories = await _Services.GetAll();
-
-            return Ok(Categories);
+            try
+            {
+                var categories = await _Services.GetAll();
+                if (categories == null)
+                {
+                    return NotFound();
+                }
+                return Ok(categories);
+            }
+            catch (Exception ex) 
+            {
+               return BadRequest("Error ");
+            } 
         }
 
         [HttpGet("{id}")]
 
         public async Task<IActionResult>GetCategory(int id)
         {
-            var Category = await _Services.GetById(id);
-            if (Category == null)
-                return NotFound();
-            return Ok(Category);
+
+            try
+            {
+                var Category = await _Services.GetById(id);
+                if (Category == null)
+                    return NotFound();
+                return Ok(Category);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error ");
+            }
         }
 
 
@@ -40,21 +58,34 @@ namespace BookStoreApi.Controllers
 
         public async Task<IActionResult> CreateAsync(Category dto)
         {
-            var Category = new Category { Name = dto.Name };
-          await _Services.Create(dto);
-           
-            return Ok(Category);
+            try
+            {
+                var Category = new Category { Name = dto.Name };
+                await _Services.Create(dto);
+
+                return Ok(Category);
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest("Error ");
+            }
+
         }
 
         [HttpPut ("{id}")]
         public async Task<IActionResult> Update(int id , Category dto)
         {
-            var Category = await _Services.Create(dto); 
-            if(Category)
-                return Ok(Category);
-           
-
-            return BadRequest("");
+            try
+            {
+                var Category = await _Services.Update(id, dto);
+                if (Category)
+                    return Ok(Category);
+                return BadRequest("Category not found");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error ");
+            }
         }
 
         [HttpDelete("{id}")]
@@ -76,7 +107,7 @@ namespace BookStoreApi.Controllers
             }
             catch (Exception ex) 
             {
-                Console.WriteLine(ex.Message);
+               // Console.WriteLine(ex.Message);
                 return BadRequest("Delete failed");
 
             }

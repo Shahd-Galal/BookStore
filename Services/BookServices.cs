@@ -1,4 +1,5 @@
-﻿using BookStoreApi.Repositories;
+﻿using BookStoreApi.Dtos;
+using BookStoreApi.Repositories;
 
 
 
@@ -40,17 +41,12 @@ namespace BookStoreApi.Services
             };
         }
 
-        public async Task<bool> Create(Book dto)
+        public async Task<bool> Create(BookDto dto)
         {
-            var bookDto = new Book
-            {
-                Title = dto.Title,
-                Author = dto.Author,
-                CategoryId = dto.CategoryId,
-            };
+          
 
-            await _repo.Add(bookDto);
-            await _repo.Save();
+            await _repo.Add(dto);
+            
             return true;
         }
 
@@ -63,15 +59,13 @@ namespace BookStoreApi.Services
             bookDto.Title = dto.Title;
             bookDto.Author = dto.Author;
             bookDto.CategoryId = dto.CategoryId;
-            _repo.Update(bookDto);
-            await _repo.Save();
             return true;
         }
 
 
 
 
-        public async Task<bool> Update(int id, Book dto)
+        public async Task<bool> Update(int id, BookDto dto)
         {
             var bookDto = await _repo.GetById(id);
             if (bookDto == null)
@@ -79,12 +73,12 @@ namespace BookStoreApi.Services
 
             bookDto.Title = dto.Title;
             bookDto.Author = dto.Author;
+            bookDto.Year = dto.Year;
             bookDto.CategoryId = dto.CategoryId;
 
-            _repo.Update(bookDto);
-            await _repo.Save();
+            await _repo.Update(bookDto);
+            //await _repo.Save();
             return true;
-
         }
 
         public async Task<bool> Delete(int id)
@@ -93,7 +87,7 @@ namespace BookStoreApi.Services
             if (bookDto == null)
                 return false;
             _repo.Delete(bookDto);
-            await _repo.Save();
+            //await _repo.Save();
             return true;
         }
 
@@ -110,7 +104,5 @@ namespace BookStoreApi.Services
            
             }).ToList();
         }
-
-       
     }
 }

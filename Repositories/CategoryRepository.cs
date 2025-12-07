@@ -56,15 +56,12 @@ namespace BookStoreApi.Repositories
         }
         public async Task Save() => await _context.SaveChangesAsync();
 
-        Task ICategoryRepository.Delete(Category category)
+         public Task Delete(Category category)
         {
-            return Delete(category, category);
-
+             _context.Remove(category);
+            return Task.CompletedTask;
         }
 
-        private async Task Delete(Category category1, Category category2)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }
